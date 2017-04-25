@@ -32,3 +32,12 @@ trace.cpp	     pin tool
 verifier.c	     our definitions of some of the common functions used in benchmarks
 
 
+References:
+Y. Shi, S. Park, Z. Yin, S. Lu, Y. Zhou, W. Chen, and W. Zheng. 
+Do i use the wrong definition? defuse: Definition-use invariants for detecting concurrency and sequential bugs. 
+In ACM Sigplan Notices 2010 Oct 17 (Vol. 45, No. 10, pp. 160-174). ACM.
+
+Alglave J, Kroening D, Tautschnig M. 
+Partial orders for efficient bounded model checking of concurrent software. 
+In International Conference on Computer Aided Verification 2013 Jul 13 (pp. 141-157). 
+Springer Berlin Heidelberg.
