@@ -36,6 +36,7 @@ trace.cpp	     pin tool
 verifier.c	     our definitions of some of the common functions used in benchmarks
 run_all.sh      run three variants of cbmc
 
+Source of CBMC changes can be found here: https://github.com/sumanthsprabhu/cbmc/tree/rf_underapprox
 
 References:
 Y. Shi, S. Park, Z. Yin, S. Lu, Y. Zhou, W. Chen, and W. Zheng. 
