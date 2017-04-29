@@ -1,10 +1,10 @@
 #set this to root of your PIN directory"
 PIN_DIR="/home/sumanth/cmi/thesis/pin/pin-3.2-81205-gcc-linux/"
-#set this to path where we can find cbmc program consisting of our changes
-CBMC_DIR="."
 #set this to path where we can find cbmc program without our changes
 PLAIN_CBMC_DIR="."
 
+#directory where we can find our modified cbmc
+CBMC_DIR="."
 #maximum time allowed for a command
 MAX_TIME=200
 #exit statuses of CBMC
