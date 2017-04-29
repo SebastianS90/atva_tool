@@ -1,12 +1,11 @@
 #!/bin/bash
 
+source "./common"
 
-#path to PIN tool
-PIN="/home/sumanth/cmi/thesis/pin/pin-3.2-81205-gcc-linux/pin"
-#path to CBMC with refinement implementation
-ENCODED_CBMC="./cbmc"
-#path to vanilla CBMC
-PLAIN_CBMC="/home/sumanth/cmi/thesis/cbmc/src/cbmc/cbmc"
+PIN=$PIN_DIR"/pin"
+ENCODED_CBMC=$CBMC_DIR"/cbmc"
+PLAIN_CBMC=$PLAIN_CBMC_DIR"/plain_cbmc"
+
 #maximum timeout for a command
 MAX_TIME=200
 
@@ -106,13 +105,13 @@ function run_arb_cbmc()
 
 function update_tables()
 {
-    cbmcResult=$cbmcResult"gain|\n"
-    invResult=$invResult":::|\n"
-    arbResult=$arbResult":::|\n"
+    cbmcResult=$cbmcResult"\n"
+    invResult=$invResult"\n"
+    #arbResult=$arbResult"|\n"
     
     table1=$table1$cbmcResult$invResult
-    table2=$table2$cbmcResult$arbResult
-    table3=$table3$cbmcResult$invResult$arbResult
+    #table2=$table2$cbmcResult$arbResult
+    #table3=$table3$cbmcResult$invResult$arbResult
 }
 
 function print_tables()
@@ -140,12 +139,8 @@ elif [ $# -eq 2 ]; then
     fileList=$1
     unwindc=$2
 else
-    print_err "Usage: ./run_all.sh file(which has list of files) unwind_count"
+    print_err "Usage: ./run_all.sh file(which has list of files and unwind_count)"
 fi    
-
-    
-
-#unwindc=$2
 
 PIN_RUNS=10
 CBMC_SAFE_STATUS=0
@@ -162,9 +157,13 @@ PLAIN_CBMC_TIME_MSG="Runtime decision procedure"
 logBaseDir="log_"`date +"%Y%m%d%H%M"`
 mkdir $logBaseDir
 
-table1="^File ^Result ^Decision Time ^Refinement ^Gain^\n "
-table2=$table1
-table3=$table2
+table1="^File ^Result ^Decision Time ^Refinement^\n"
+#table2=$table1
+#table3=$table2
+
+if [[ ! -f $TRACE_SO || ! -f $PARSE_BIN ]]; then
+    compile_pin_tool
+fi
 
 
 while read line1; do
@@ -173,13 +172,11 @@ while read line1; do
 	print_debug "Skipping \"$line1\"."
     fi
     
-    unwindc1=`echo $line1 | cut -d' ' -f2`
-    if [[ -z $unwindc && -z $unwindc1 ]]; then
+    unwindc=`echo $line1 | cut -d' ' -f2`
+    if [ -z $unwindc ]; then
 	print_info "Skipping $inputFile"
-	print_info "Either provide -u unwind_count or unwind_count for $inputFile in $fileList."
+	print_info "Provide  unwind_count for $inputFile in $fileList."
 	continue;
-    elif [ -z $unwindc ]; then
-	unwindc=$unwindc1
     fi
     
     input=`basename ${inputFull%.*}`
@@ -240,7 +237,7 @@ while read line1; do
 	parseSuccess=0
 	invResult=$invResult"|-|-|FIXME parse failed|"
 	run_plain_cbmc
-	run_arb_cbmc
+	#run_arb_cbmc
 	update_tables
 	print_tables
 	continue
@@ -250,7 +247,7 @@ while read line1; do
     
     run_inv_cbmc
 
-    run_arb_cbmc
+    #run_arb_cbmc
 
     run_plain_cbmc
 

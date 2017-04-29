@@ -1,22 +1,10 @@
 #!/bin/bash
 
-#set this to root of your Pin directory"
-PIN_DIR="/home/sumanth/cmi/thesis/pin/pin-3.2-81205-gcc-linux/"
-#set this to path where we can find cbmc binary"
-CBMC_DIR="."
-#maximum time allowed for a command
-MAX_TIME=200
-#exit statuses of CBMC
-CBMC_SAFE_STATUS=0
-CBMC_UNSAFE_STATUS=10
-#number of runs of input program under pin tool
-PIN_RUNS=10
+source "./common"
 
 CBMC=$CBMC_DIR"/cbmc"
 PIN=$PIN_DIR"/pin"
 TIMEOUT="timeout --preserve-status -k 3 $MAX_TIME"
-TRACE_SO="./trace.so"
-PARSE_BIN="./parse"
 
 
 single_file=0
@@ -42,80 +30,7 @@ function print_err()
     exit 1
 }
 
-#requires $PIN_DIR, $TRACE_SO, $PARSE_BIN to be set
-function compile_pin_tool()
-{
-    print_debug "compiling $TRACE_SO"
-    
-        g++ -ggdb -DBIGARRAY_MULTIPLIER=1 -Wall -Werror -Wno-unknown-pragmas -D__PIN__=1 -DPIN_CRT=1 -fno-stack-protector -fno-exceptions \
-	-funwind-tables -fasynchronous-unwind-tables -fno-rtti -DTARGET_IA32E -DHOST_IA32E -fPIC -DTARGET_LINUX -fabi-version=2  \
-	-I $PIN_DIR/source/include/pin -I $PIN_DIR/source/include/pin/gen -isystem $PIN_DIR/extras/stlport/include -isystem $PIN_DIR/extras/libstdc++/include \
-	-isystem $PIN_DIR/extras/crt/include -isystem $PIN_DIR/extras/crt/include/arch-x86_64 -isystem $PIN_DIR/extras/crt/include/kernel/uapi -isystem \
-	$PIN_DIR/extras/crt/include/kernel/uapi/asm-x86 -I $PIN_DIR/extras/components/include -I $PIN_DIR/extras/xed-intel64/include/xed \
-	-I $PIN_DIR/source/tools/InstLib -O3 -fomit-frame-pointer -fno-strict-aliasing   -c -o trace.o trace.cpp
 
-    if [ $? -ne 0 ]; then
-	exit
-    fi
-   
-    g++ -ggdb -shared -Wl,--hash-style=sysv $PIN_DIR/intel64/runtime/pincrt/crtbeginS.o -Wl,-Bsymbolic \
-	-Wl,--version-script=$PIN_DIR/source/include/pin/pintool.ver -fabi-version=2    \
-	-o $TRACE_SO  trace.o  -L$PIN_DIR/intel64/runtime/pincrt \
-	-L$PIN_DIR/intel64/lib -L$PIN_DIR/intel64/lib-ext -L$PIN_DIR/extras/xed-intel64/lib -lpin -lxed \
-	$PIN_DIR/intel64/runtime/pincrt/crtendS.o -lpin3dwarf  -ldl-dynamic -nostdlib -lstlport-dynamic \
-	-lm-dynamic -lc-dynamic -lunwind-dynamic
-
-    if [ $? -ne 0 ]; then
-	exit
-    fi
-
-    print_debug "compiled $TRACE_SO"
-    
-    #compile parse file
-    g++ -ggdb -o $PARSE_BIN parse.cpp
-
-    if [ $? -ne 0 ]; then
-	exit
-    fi
-    
-    print_debug "compiled $PARSE_BIN"
-}
-
-#decodes address to line number and variable using gdb
-#requires $defuse, $inputBin, $defuse_cbmc
-decode()
-{
-    output=""
-    line=""
-    print_debug "decoding address to line from $defuse to $defuse_cbmc"
-    while read line; do
-	arr=($line)
-	if [[ ${arr[0]} =~ ^# ]]
-	then
-	    break
-	fi
-	#each line is of the form: variable_addr read_ins_addr #writes (write_ins_addr)+
-	for (( i=0; i<$(( ${#arr[*]} )); i++))
-	do
-	    if [ $i -ne 0 ] && [ $i -ne 2 ]; then
-		 #address to line number
-		output=$output`gdb -batch -ex "file $inputBin" -ex "info line *${arr[$i]}" | cut -d' ' -f2`
-		output=$output" "
-	    elif [ $i -eq 0 ]; then
-		#variable_addr to variable_name
-		output=$output`gdb -batch -ex "file $inputBin" -ex "info symbol ${arr[$i]}" | cut -d' ' -f1`
-		output=$output" "
-	    elif [ $i -eq 2 ]; then 
-		#number of writes
-		output=$output${arr[$i]}
-		output=$output" "
-	    fi
-	done
-	output="$output\n"
-	#echo >> $invFile
-    done < $defuse
-    echo -n -e $output > $defuse_cbmc
-}
 
 #requires $TIMEOUT, $CBMC, $unwindc, $defuse_cbmc, $inputExt, $cbmcOut, $CBMC_SAFE_STATUS, $CBMC_UNSAFE_STATUS
 function run_cbmc()
