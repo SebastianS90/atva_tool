@@ -4,7 +4,7 @@ source "./common"
 
 PIN=$PIN_DIR"/pin"
 ENCODED_CBMC=$CBMC_DIR"/cbmc"
-PLAIN_CBMC=$PLAIN_CBMC_DIR"/plain_cbmc"
+PLAIN_CBMC=$PLAIN_CBMC_DIR"/cbmc"
 
 #maximum timeout for a command
 MAX_TIME=200
