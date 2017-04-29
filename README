@@ -11,7 +11,6 @@ Bash (tested on version 4.3.42)
 Plain CBMC (you can download the binary from here: http://www.cprover.org/cbmc/). This is required if you want to compare our performace against CBMC (i.e. to run the script run_all.sh)
 
 Input file that will be provided to the tool should be "compilable" (i.e. "gcc file.c -lpthread" should work)
-Change the function run_file in run.sh to add additional flags
 
 RUNNING
 =======
