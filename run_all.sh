@@ -118,8 +118,8 @@ function print_tables()
 {
     resultFile=$logBaseDir"/result"
     echo -e $table1 | tee -a $resultFile
-    echo -e $table2 | tee -a $resultFile
-    echo -e $table3 | tee -a $resultFile
+#    echo -e $table2 | tee -a $resultFile
+#    echo -e $table3 | tee -a $resultFile
 }
 
 function print_debug()
