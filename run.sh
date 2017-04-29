@@ -113,7 +113,7 @@ function run_file()
 function usage()
 {
     echo "Usage: run.sh -f inputFile -u unwind_count"
-    echo "Or run.sh [-u unwind_count] file_with_list_of_files"
+    echo "Or run.sh file_with_list_of_files"
     exit 1
 }
 
@@ -148,6 +148,12 @@ if [[ $singleFile -eq 1 && ! -z $1 ]]; then
     usage
 fi
 
+if [[ $singleFile -eq 1 && -z $unwindc ]]; then
+    print_info "-u unwind_count missing!"
+    usage
+fi
+
+
 fileList=$1
 
 if [ ! -f $CBMC ]; then
@@ -177,15 +183,14 @@ while read line1; do
     inputFile=`echo $line1 | cut -d' ' -f1`
     if [[ -z $inputFile || ! -f $inputFile ]]; then
 	print_info "Skipping \"$line1\"."
+	continue
     fi
     
-    unwindc1=`echo $line1 | cut -d' ' -f2`
-    if [[ -z $unwindc && -z $unwindc1 ]]; then
+    unwindc=`echo $line1 | cut -d' ' -f2`
+    if [ -z $unwindc ]; then
 	print_info "Skipping $inputFile"
-	print_info "Either provide -u unwind_count or unwind_count for $inputFile in $fileList."
-	continue;
-    elif [ -z $unwindc ]; then
-	unwindc=$unwindc1
+	print_info "unwind count is missing for $inputFile in $fileList."
+	continue
     fi
     
     run_file

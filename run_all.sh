@@ -170,6 +170,7 @@ while read line1; do
     inputFull=`echo $line1 | cut -d' ' -f1`
     if [[ -z $inputFull || ! -f $inputFull ]]; then
 	print_debug "Skipping \"$line1\"."
+	continue;
     fi
     
     unwindc=`echo $line1 | cut -d' ' -f2`
